@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 public class Provider extends ContentProvider {
-	public static String AUTHORITY = "com.axelby.gpodder";
+	public static String AUTHORITY = "com.axelby.gpodder.podcasts";
 	public static Uri URI = Uri.parse("content://" + AUTHORITY);
 	public static final String ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
 			+ "/vnd.axelby.gpodder.podcast";
@@ -37,7 +37,9 @@ public class Provider extends ContentProvider {
 		DBAdapter dbAdapter = new DBAdapter(this.getContext());
 		SQLiteDatabase db = dbAdapter.getReadableDatabase();
 		if (uri.equals(AUTHORITY))
-			return db.query("subscriptions", new String[] { "url" }, null, null, null, null, "url");
+			return db.rawQuery("SELECT url FROM " +
+					"(SELECT url FROM subscriptions UNION select url from pending_add)" +
+					"WHERE url NOT IN (SELECT url FROM pending_remove)", null);
 		else
 			return db.query("subscriptions", new String[] { "url" }, "url = ?", new String[] { uri.getPath() }, null, null, null);
 	}

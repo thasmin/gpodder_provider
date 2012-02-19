@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPodder</string>
+	<string name="authenticator_activity_title">GPodder Account Details</string>
+	<string name="gpodder">GPodder</string>
 </resources>
