@@ -164,6 +164,7 @@ public class Client {
 		public Vector<String> removed = new Vector<String>();
 		public int timestamp = 0;
 		public boolean isValid() { return timestamp != 0; }
+		public boolean isEmpty() { return added.size() > 0 || removed.size() > 0; }
 	}
 
 	public Changes getSubscriptionChanges(int lastCheck) {

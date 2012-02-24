@@ -64,6 +64,15 @@ public class SyncService extends Service {
 			SharedPreferences.Editor gpodderPrefsEditor = gpodderPrefs.edit();
 			gpodderPrefsEditor.putInt("lastTimestamp", changes.timestamp);
 			gpodderPrefsEditor.commit();
+
+			// if there are changes, broadcast to all interested apps
+			if (!changes.isEmpty()) {
+				Intent intent = new Intent("com.axelby.gpodder.SUBSCRIPTION_UPDATE");
+				intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_ADDED", changes.added.toArray(new String[] { }));
+				intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_REMOVED", changes.removed.toArray(new String[] { }));
+				_context.sendBroadcast(intent);
+			}
+
 		}
 
 		private void updateSubscriptions(Changes changes) {

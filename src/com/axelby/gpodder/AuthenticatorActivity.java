@@ -140,22 +140,27 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 	}
 
 	private void finishLogin() {
-        final Account account = new Account(_username, Constants.ACCOUNT_TYPE);
+		final Account account = new Account(_username, Constants.ACCOUNT_TYPE);
         
-        AccountManager accountManager = AccountManager.get(this);
-        if (_requestNewAccount) {
-            accountManager.addAccountExplicitly(account, _password, null);
-            // Set contacts sync for this account.
+		AccountManager accountManager = AccountManager.get(this);
+		if (_requestNewAccount) {
+			// if this is our first account, ask for everyone to tell us about their subscriptions
+			if (accountManager.getAccountsByType("com.axelby.gpodder").length == 0) {
+				Intent intent = new Intent("com.axelby.gpodder.INITIALIZE");
+				sendBroadcast(intent);
+			}
+			accountManager.addAccountExplicitly(account, _password, null);
+			// Set contacts sync for this account.
 			ContentResolver.setSyncAutomatically(account, Provider.AUTHORITY, true);
-        } else {
-            accountManager.setPassword(account, _password);
-        }       
-        final Intent intent = new Intent();
-        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, _username);
+		} else {
+			accountManager.setPassword(account, _password);
+		}
+		final Intent intent = new Intent();
+		intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, _username);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
-        setAccountAuthenticatorResult(intent.getExtras());
-        setResult(RESULT_OK, intent);
-        finish();
+		setAccountAuthenticatorResult(intent.getExtras());
+		setResult(RESULT_OK, intent);
+		finish();
 	}
 
 	protected void finishConfirmCredentials(boolean result) {
