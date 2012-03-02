@@ -79,7 +79,7 @@ public class SyncService extends Service {
 			SQLiteDatabase db = new DBAdapter(_context).getWritableDatabase();
 
 			for (String addedUrl : changes.added)
-				db.execSQL("INSERT INTO subscriptions(url) VALUES(?)", new Object[] { addedUrl });
+				db.execSQL("INSERT INTO subscriptions(url) SELECT ? FROM subscriptions WHERE 0 = (SELECT COUNT(url) FROM subscriptions WHERE url = ?)", new Object[] { addedUrl, addedUrl });
 
 			for (String removedUrl : changes.removed)
 				db.execSQL("DELETE FROM subscriptions WHERE url = ?", new Object[] { removedUrl });
