@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 public class Provider extends ContentProvider {
 	public static String AUTHORITY = "com.axelby.gpodder.podcasts";
@@ -26,7 +27,7 @@ public class Provider extends ContentProvider {
 	// otherwise, only match will be returned
 	@Override
 	public String getType(Uri uri) {
-		return uri.equals(AUTHORITY) ? DIR_TYPE : ITEM_TYPE;
+		return uri.equals(URI) ? DIR_TYPE : ITEM_TYPE;
 	}
 
 	// if uri is the authority, all podcasts will be return
@@ -36,7 +37,7 @@ public class Provider extends ContentProvider {
 			String[] selectionArgs, String sortOrder) {
 		DBAdapter dbAdapter = new DBAdapter(this.getContext());
 		SQLiteDatabase db = dbAdapter.getReadableDatabase();
-		if (uri.equals(AUTHORITY))
+		if (uri.equals(URI))
 			return db.rawQuery("SELECT url FROM " +
 					"(SELECT url FROM subscriptions UNION select url from pending_add)" +
 					"WHERE url NOT IN (SELECT url FROM pending_remove)", null);
@@ -55,9 +56,10 @@ public class Provider extends ContentProvider {
 	// if it's not in the subscriptions table, add it to the pending_add table
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		if (!uri.equals(AUTHORITY) || !values.containsKey(URL))
+		if (!uri.equals(URI) || !values.containsKey(URL))
 			return null;
 		String url = values.getAsString(URL);
+		Log.d("gpodder", "adding " + url);
 		DBAdapter dbAdapter = new DBAdapter(this.getContext());
 		SQLiteDatabase db = dbAdapter.getReadableDatabase();
 		db.delete("pending_remove", "url = ?", new String[] { url });
@@ -73,20 +75,58 @@ public class Provider extends ContentProvider {
 	// selection is ignored, selection args[0] is matched
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		if (!uri.equals(AUTHORITY) || selectionArgs.length == 0)
+		if (!uri.equals(URI))
 			return 0;
-		String url = selectionArgs[0];
+
 		DBAdapter dbAdapter = new DBAdapter(this.getContext());
-		SQLiteDatabase db = dbAdapter.getReadableDatabase();
-		db.delete("pending_add", "url = ?", new String[] { url });
-		Cursor c = db.rawQuery("SELECT COUNT(*) FROM subscriptions WHERE url = ?", new String[] { url });
-		c.moveToFirst();
-		if (c.getLong(0) == 1) {
-			ContentValues values = new ContentValues();
-			values.put(URL, url);
-			db.insert("pending_add", null, values);
+		SQLiteDatabase db = dbAdapter.getWritableDatabase();
+
+		if (selectionArgs != null && selectionArgs.length > 0) {
+			for (String url : selectionArgs) {
+				Log.d("gpodder", "removing " + url);
+				db.delete("pending_add", "url = ?", new String[] { url });
+				Cursor c = db.rawQuery("SELECT COUNT(*) FROM subscriptions WHERE url = ?", new String[] { url });
+				c.moveToFirst();
+				if (c.getLong(0) == 1) {
+					ContentValues values = new ContentValues();
+					values.put(URL, url);
+					db.insert("pending_remove", null, values);
+				}
+			}
+			return selectionArgs.length;
+		} else {
+			int count = db.delete("pending_add", "1", null);
+			db.delete("pending_remove", null, null);
+			Cursor c = db.query("subscriptions", new String[] { "url" }, null, null, null, null, null);
+			while (c.moveToNext()) {
+				++count;
+				db.insert("pending_remove", null, makeUrlValues(c.getString(0)));
+			}
+			c.close();
+			return count;
 		}
-		return 1;
 	}
 
+	private ContentValues makeUrlValues(String url) {
+		ContentValues values = new ContentValues();
+		values.put("url", url);
+		return values;
+	}
+
+	public void fakeSync() {
+		DBAdapter dbAdapter = new DBAdapter(this.getContext());
+		SQLiteDatabase db = dbAdapter.getWritableDatabase();
+
+		Cursor c = db.query("pending_remove", new String[] { "url" }, null, null, null, null, null);
+		while (c.moveToNext())
+			db.delete("subscriptions", "url = ?", new String[] { c.getString(0) });
+		c.close();
+		db.delete("pending_remove", null, null);
+
+		c = db.query("pending_add", new String[] { "url" }, null, null, null, null, null);
+		while (c.moveToNext())
+			db.insert("subscriptions", null, makeUrlValues(c.getString(0)));
+		c.close();
+		db.delete("pending_add", null, null);
+	}
 }

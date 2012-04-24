@@ -18,6 +18,7 @@ import net.iHarder.Base64;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -277,6 +278,16 @@ public class Client {
 			db.execSQL("DELETE FROM pending_remove");
 
 			// no need to handle the output
+			Log.d("gpodder", "done syncing");
+			c = db.rawQuery("SELECT count(url) FROM pending_add", null);
+			while (c.moveToNext())
+				Log.d("gpodder", "urls left to add: " + c.getInt(0));
+			c.close();
+			c = db.rawQuery("SELECT count(url) FROM pending_remove", null);
+			while (c.moveToNext())
+				Log.d("gpodder", "urls left to remove: " + c.getInt(0));
+			c.close();
+
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
