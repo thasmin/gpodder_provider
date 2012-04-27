@@ -59,6 +59,7 @@ public class Client {
 		try {
 			URL url = new URL("http://gpodder.net/clientconfig.json");
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+			conn.addRequestProperty("User-Agent", "GPodder.net Account for Android");
 			JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream()));
 			reader.beginObject();
 			
@@ -122,6 +123,7 @@ public class Client {
 		} else {
 			conn.addRequestProperty("Cookie", "sessionid=" + _sessionId);
 		}
+		conn.addRequestProperty("User-Agent", "GPodder.net Account for Android");
 
 		return conn;
 	}
