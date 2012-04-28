@@ -238,8 +238,10 @@ public class Client {
 			toRemove.add(c.getString(0));
 		c.close();
 
-		if (toAdd.size() == 0 && toRemove.size() == 0)
+		if (toAdd.size() == 0 && toRemove.size() == 0) {
+			db.close();
 			return;
+		}
 
 		URL url;
 		HttpsURLConnection conn = null;
@@ -281,14 +283,8 @@ public class Client {
 
 			// no need to handle the output
 			Log.d("gpodder", "done syncing");
-			c = db.rawQuery("SELECT count(url) FROM pending_add", null);
-			while (c.moveToNext())
-				Log.d("gpodder", "urls left to add: " + c.getInt(0));
-			c.close();
-			c = db.rawQuery("SELECT count(url) FROM pending_remove", null);
-			while (c.moveToNext())
-				Log.d("gpodder", "urls left to remove: " + c.getInt(0));
-			c.close();
+
+			db.close();
 
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

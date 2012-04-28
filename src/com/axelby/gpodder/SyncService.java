@@ -51,7 +51,7 @@ public class SyncService extends Service {
 				return;
 
 			SharedPreferences gpodderPrefs = getContext().getSharedPreferences("gpodder", MODE_PRIVATE);
-			int lastTimestamp = gpodderPrefs.getInt("lastTimestamp", 0);
+			int lastTimestamp = gpodderPrefs.getInt("lastTimestamp-" + account.name, 0);
 			
 			// send diffs to gpodder
 			client.syncDiffs();
@@ -62,27 +62,26 @@ public class SyncService extends Service {
 
 			// remember when we last updated
 			SharedPreferences.Editor gpodderPrefsEditor = gpodderPrefs.edit();
-			gpodderPrefsEditor.putInt("lastTimestamp", changes.timestamp);
+			gpodderPrefsEditor.putInt("lastTimestamp-" + account.name, changes.timestamp);
 			gpodderPrefsEditor.commit();
 
-			// if there are changes, broadcast to all interested apps
-			if (!changes.isEmpty()) {
-				Intent intent = new Intent("com.axelby.gpodder.SUBSCRIPTION_UPDATE");
-				intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_ADDED", changes.added.toArray(new String[] { }));
-				intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_REMOVED", changes.removed.toArray(new String[] { }));
-				_context.sendBroadcast(intent);
-			}
-
+			// broadcast to all interested apps
+			Intent intent = new Intent("com.axelby.gpodder.SUBSCRIPTION_UPDATE");
+			intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_ADDED", changes.added.toArray(new String[] { }));
+			intent.putExtra("com.axelby.gpodder.SUBSCRIPTION_REMOVED", changes.removed.toArray(new String[] { }));
+			_context.sendBroadcast(intent);
 		}
 
 		private void updateSubscriptions(Changes changes) {
 			SQLiteDatabase db = new DBAdapter(_context).getWritableDatabase();
 
 			for (String addedUrl : changes.added)
-				db.execSQL("INSERT INTO subscriptions(url) SELECT ? FROM subscriptions WHERE 0 = (SELECT COUNT(url) FROM subscriptions WHERE url = ?)", new Object[] { addedUrl, addedUrl });
+				db.execSQL("INSERT INTO subscriptions(url) SELECT ? WHERE 0 = (SELECT COUNT(url) FROM subscriptions WHERE url = ?)", new Object[] { addedUrl, addedUrl });
 
 			for (String removedUrl : changes.removed)
 				db.execSQL("DELETE FROM subscriptions WHERE url = ?", new Object[] { removedUrl });
+
+			db.close();
 		}
 	
 	}
