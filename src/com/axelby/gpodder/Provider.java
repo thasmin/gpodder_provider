@@ -44,7 +44,6 @@ public class Provider extends ContentProvider {
 					"WHERE url NOT IN (SELECT url FROM pending_remove)", null);
 		else
 			c = db.query("subscriptions", new String[] { "url" }, "url = ?", new String[] { uri.getPath() }, null, null, null);
-		db.close();
 		return c;
 	}
 
@@ -70,7 +69,7 @@ public class Provider extends ContentProvider {
 		c.moveToFirst();
 		if (c.getLong(0) == 0)
 			db.insert("pending_add", null, values);
-		db.close();
+		c.close();
 		return Uri.withAppendedPath(URI, url);
 	}
 
@@ -96,8 +95,8 @@ public class Provider extends ContentProvider {
 					values.put(URL, url);
 					db.insert("pending_remove", null, values);
 				}
+				c.close();
 			}
-			db.close();
 			return selectionArgs.length;
 		} else {
 			int count = db.delete("pending_add", "1", null);
@@ -108,7 +107,6 @@ public class Provider extends ContentProvider {
 				db.insert("pending_remove", null, makeUrlValues(c.getString(0)));
 			}
 			c.close();
-			db.close();
 			return count;
 		}
 	}
