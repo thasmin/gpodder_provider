@@ -128,7 +128,7 @@ public class Client {
 		return conn;
 	}
 
-	protected boolean authenticate() {
+	public boolean authenticate() {
 		verifyCurrentConfig();
 
 		URL url;
