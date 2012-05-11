@@ -88,14 +88,8 @@ public class Provider extends ContentProvider {
 			for (String url : selectionArgs) {
 				Log.d("gpodder", "removing " + url);
 				db.delete("pending_add", "url = ?", new String[] { url });
-				Cursor c = db.rawQuery("SELECT COUNT(*) FROM subscriptions WHERE url = ?", new String[] { url });
-				c.moveToFirst();
-				if (c.getLong(0) == 1) {
-					ContentValues values = new ContentValues();
-					values.put(URL, url);
-					db.insert("pending_remove", null, values);
-				}
-				c.close();
+				db.delete("subscriptions", "url = ?", new String[] { url });
+				db.insert("pending_remove", null, makeUrlValues(url));
 			}
 			return selectionArgs.length;
 		} else {
