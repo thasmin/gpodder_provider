@@ -59,7 +59,7 @@ public class Client {
 		try {
 			URL url = new URL("http://gpodder.net/clientconfig.json");
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			conn.addRequestProperty("User-Agent", "GPodder.net Account for Android");
+			conn.addRequestProperty("User-Agent", "gpodder_provider/1.4");
 			JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream()));
 			reader.beginObject();
 			
