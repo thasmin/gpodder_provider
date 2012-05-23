@@ -34,10 +34,6 @@ public class Client {
 	private static Config _config;
 	private static Calendar _configRefresh = null;
 
-	static {
-		verifyCurrentConfig();
-	}
-
 	public static void verifyCurrentConfig() {
 		if (_configRefresh == null || _configRefresh.before(new GregorianCalendar())) {
 			_config = retrieveGPodderConfig();
