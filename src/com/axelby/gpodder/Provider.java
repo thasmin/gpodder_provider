@@ -17,6 +17,7 @@ public class Provider extends ContentProvider {
 			+ "/vnd.axelby.gpodder.podcast";
 
 	public static final String URL = "url";
+	private DBAdapter _dbAdapter = new DBAdapter(this.getContext());
 
 	@Override
 	public boolean onCreate() {
@@ -35,8 +36,7 @@ public class Provider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		DBAdapter dbAdapter = new DBAdapter(this.getContext());
-		SQLiteDatabase db = dbAdapter.getReadableDatabase();
+		SQLiteDatabase db = _dbAdapter.getReadableDatabase();
 		Cursor c;
 		if (uri.equals(URI))
 			c = db.rawQuery("SELECT url FROM " +
@@ -62,8 +62,7 @@ public class Provider extends ContentProvider {
 			return null;
 		String url = values.getAsString(URL);
 		Log.d("gpodder", "adding " + url);
-		DBAdapter dbAdapter = new DBAdapter(this.getContext());
-		SQLiteDatabase db = dbAdapter.getReadableDatabase();
+		SQLiteDatabase db = _dbAdapter.getReadableDatabase();
 		db.delete("pending_remove", "url = ?", new String[] { url });
 		Cursor c = db.rawQuery("SELECT COUNT(*) FROM subscriptions WHERE url = ?", new String[] { url });
 		c.moveToFirst();
@@ -81,8 +80,7 @@ public class Provider extends ContentProvider {
 		if (!uri.equals(URI))
 			return 0;
 
-		DBAdapter dbAdapter = new DBAdapter(this.getContext());
-		SQLiteDatabase db = dbAdapter.getWritableDatabase();
+		SQLiteDatabase db = _dbAdapter.getWritableDatabase();
 
 		if (selectionArgs != null && selectionArgs.length > 0) {
 			for (String url : selectionArgs) {
@@ -112,8 +110,7 @@ public class Provider extends ContentProvider {
 	}
 
 	public void fakeSync() {
-		DBAdapter dbAdapter = new DBAdapter(this.getContext());
-		SQLiteDatabase db = dbAdapter.getWritableDatabase();
+		SQLiteDatabase db = _dbAdapter.getWritableDatabase();
 
 		Cursor c = db.query("pending_remove", new String[] { "url" }, null, null, null, null, null);
 		while (c.moveToNext())
