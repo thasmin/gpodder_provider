@@ -17,10 +17,11 @@ public class Provider extends ContentProvider {
 			+ "/vnd.axelby.gpodder.podcast";
 
 	public static final String URL = "url";
-	private DBAdapter _dbAdapter = new DBAdapter(this.getContext());
+	private DBAdapter _dbAdapter;
 
 	@Override
 	public boolean onCreate() {
+		_dbAdapter = new DBAdapter(this.getContext());
 		return true;
 	}
 	
@@ -39,7 +40,7 @@ public class Provider extends ContentProvider {
 		SQLiteDatabase db = _dbAdapter.getReadableDatabase();
 		Cursor c;
 		if (uri.equals(URI))
-			c = db.rawQuery("SELECT url FROM " +
+			c = db.rawQuery("SELECT ROWID as _id, url FROM " +
 					"(SELECT url FROM subscriptions UNION select url from pending_add)" +
 					"WHERE url NOT IN (SELECT url FROM pending_remove)", null);
 		else

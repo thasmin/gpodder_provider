@@ -21,6 +21,15 @@
 				  android:label="@string/authenticator_activity_title"
 				  android:exported="true" />
 
+		<activity android:name=".SubscriptionsActivity"
+		    android:label="Subscriptions"
+		    android:exported="true">
+		    <intent-filter>
+		        <action android:name="com.axelby.gpodder.subscriptions" />
+		        <category android:name="android.intent.category.DEFAULT" />
+		    </intent-filter>
+		</activity>
+
 		<service android:name=".AuthenticationService">
 			<intent-filter>
 				<action android:name="android.accounts.AccountAuthenticator" />
