@@ -11,10 +11,8 @@ import android.util.Log;
 public class Provider extends ContentProvider {
 	public static String AUTHORITY = "com.axelby.gpodder.podcasts";
 	public static Uri URI = Uri.parse("content://" + AUTHORITY);
-	public static final String ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-			+ "/vnd.axelby.gpodder.podcast";
-	public static final String DIR_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-			+ "/vnd.axelby.gpodder.podcast";
+	public static final String ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.axelby.gpodder.podcast";
+	public static final String DIR_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.axelby.gpodder.podcast";
 
 	public static final String URL = "url";
 	private DBAdapter _dbAdapter;
@@ -38,9 +36,11 @@ public class Provider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
 		SQLiteDatabase db = _dbAdapter.getReadableDatabase();
+
+		String columns = projection != null ? projection[0] : "ROWID as _id, url";
 		Cursor c;
 		if (uri.equals(URI))
-			c = db.rawQuery("SELECT ROWID as _id, url FROM " +
+			c = db.rawQuery("SELECT " + columns + " FROM " +
 					"(SELECT url FROM subscriptions UNION select url from pending_add)" +
 					"WHERE url NOT IN (SELECT url FROM pending_remove)", null);
 		else
