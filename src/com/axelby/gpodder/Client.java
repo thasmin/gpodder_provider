@@ -265,7 +265,7 @@ public class Client {
 			writer.endArray();
 
 			writer.endObject();
-			streamWriter.close();
+			writer.close();
 
 			conn.connect();
 
