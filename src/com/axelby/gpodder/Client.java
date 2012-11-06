@@ -205,6 +205,7 @@ public class Client {
 			}
 
 			reader.endObject();
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
