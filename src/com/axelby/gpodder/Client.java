@@ -158,6 +158,85 @@ public class Client {
 		return true;
 	}
 
+	public String getDeviceName() {
+		verifyCurrentConfig();
+
+		URL url;
+		HttpsURLConnection conn = null;
+		try {
+			url = new URL(_config.mygpo + "api/2/devices/" + _username + ".json");
+			conn = createConnection(url);
+			conn.connect();
+
+			int code = conn.getResponseCode();
+			if (code != 200)
+				return null;
+
+			InputStream stream = conn.getInputStream();
+			JsonReader reader = new JsonReader(new InputStreamReader(stream));
+			try {
+				reader.beginArray();
+				while (reader.hasNext()) {
+					reader.beginObject();
+					String id = null;
+					String caption = null;
+					while (reader.hasNext()) {
+						String key = reader.nextName();
+						if (key.equals("id"))
+							id = reader.nextString();
+						else if (key.equals("caption"))
+							caption = reader.nextString();
+						else
+							reader.skipValue();
+					}
+
+					if (id != null && id.equals("podax"))
+						return caption;
+					reader.endObject();
+				}
+				reader.endArray();
+			} finally {
+				reader.close();
+			}
+
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null)
+				conn.disconnect();
+		}
+		return null;
+	}
+
+	public boolean setDeviceName(String deviceName) {
+		verifyCurrentConfig();
+
+		URL url;
+		HttpsURLConnection conn = null;
+		try {
+			url = new URL(_config.mygpo + "api/2/devices/" + _username + "/podax.json");
+			conn = createConnection(url);
+			writePost(conn, "{\"caption\": \"" + deviceName + "\", \"type\": \"mobile\"}");
+			conn.connect();
+
+			int code = conn.getResponseCode();
+			if (code != 200)
+				return false;
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null)
+				conn.disconnect();
+		}
+		return true;
+	}
+
 	public class Changes {
 		public Vector<String> added = new Vector<String>();
 		public Vector<String> removed = new Vector<String>();

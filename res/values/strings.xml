@@ -5,4 +5,7 @@
 	<string name="gpodder">GPodder</string>
 	<string name="no_subscriptions_were_found">No subscriptions were found.</string>
 	<string name="subscriptions">Subscriptions</string>
+	<string name="configuration">Configuration</string>
+	<string name="device_name">Device Name</string>
+	<string name="save">Save</string>
 </resources>

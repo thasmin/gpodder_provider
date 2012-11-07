@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <Preference android:title="@string/configuration" >
+        <intent android:action="com.axelby.gpodder.configuration" />
+    </Preference>
+
     <Preference android:title="@string/subscriptions" >
         <intent android:action="com.axelby.gpodder.subscriptions" />
     </Preference>
