@@ -51,7 +51,7 @@ public class ConfigurationActivity extends Activity {
 				}.execute(deviceName);
 			}
 		});
-		
+
 		new AsyncTask<Void, Void, String>() {
 			@Override
 			protected String doInBackground(Void... params) {
@@ -60,7 +60,9 @@ public class ConfigurationActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(String result) {
-				deviceNameEdit.append(result);
+			    if (result != null) {
+			        deviceNameEdit.append(result);
+			    }
 				loadingDialog.dismiss();
 			}
 		}.execute();
